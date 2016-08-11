@@ -42,12 +42,20 @@ class Economic::Endpoint
   #
   # Cached on class-level to avoid loading the big WSDL file more than once (can
   # take several hundred megabytes of RAM after a while...)
-  def client
-    @@client ||= Savon.client do
+  #
+  # ==== Attributes
+  #
+  # * +savon_options+ - A hash of options passed to `Savon.client`
+  def client(savon_options = {})
+
+    if @app_identifier
+      savon_options.merge!(:headers => { "X-EconomicAppIdentifier" => @app_identifier })
+    end
+
+    @@client ||= Savon.client(savon_options) do
       wsdl      File.expand_path(File.join(File.dirname(__FILE__), "economic.wsdl"))
       log       false
       log_level :info
-      headers("X-EconomicAppIdentifier" => @app_identifier) if @app_identifier
     end
   end
 
